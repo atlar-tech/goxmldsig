@@ -177,14 +177,6 @@ func (ctx *SigningContext) ConstructSignature(el *etree.Element, enveloped bool)
 		return nil, err
 	}
 
-	certs := [][]byte{cert}
-	if cs, ok := ctx.KeyStore.(X509ChainStore); ok {
-		certs, err = cs.GetChain()
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	rawSignature, err := rsa.SignPKCS1v15(rand.Reader, key, ctx.Hash, digest)
 	if err != nil {
 		return nil, err
@@ -195,6 +187,14 @@ func (ctx *SigningContext) ConstructSignature(el *etree.Element, enveloped bool)
 
 	keyInfo := ctx.createNamespacedElement(sig, KeyInfoTag)
 	x509Data := ctx.createNamespacedElement(keyInfo, X509DataTag)
+
+	certs := [][]byte{cert}
+	if cs, ok := ctx.KeyStore.(X509ChainStore); ok {
+		certs, err = cs.GetChain()
+		if err != nil {
+			return nil, err
+		}
+	}
 	for _, cert := range certs {
 		x509Certificate := ctx.createNamespacedElement(x509Data, X509CertificateTag)
 		x509Certificate.SetText(base64.StdEncoding.EncodeToString(cert))
