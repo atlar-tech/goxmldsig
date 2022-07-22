@@ -19,6 +19,7 @@ type SigningContext struct {
 	KeyStore      X509KeyStore
 	IdAttribute   string
 	Prefix        string
+	SkipKeyInfo   bool
 	Canonicalizer Canonicalizer
 }
 
@@ -28,6 +29,7 @@ func NewDefaultSigningContext(ks X509KeyStore) *SigningContext {
 		KeyStore:      ks,
 		IdAttribute:   DefaultIdAttr,
 		Prefix:        DefaultPrefix,
+		SkipKeyInfo:   false,
 		Canonicalizer: MakeC14N11Canonicalizer(),
 	}
 }
@@ -96,7 +98,6 @@ func (ctx *SigningContext) constructSignedInfo(el *etree.Element, enveloped bool
 	} else {
 		reference.CreateAttr(URIAttr, "#"+dataId)
 	}
-
 
 	// /SignedInfo/Reference/Transforms
 	transforms := ctx.createNamespacedElement(reference, TransformsTag)
@@ -185,19 +186,22 @@ func (ctx *SigningContext) ConstructSignature(el *etree.Element, enveloped bool)
 	signatureValue := ctx.createNamespacedElement(sig, SignatureValueTag)
 	signatureValue.SetText(base64.StdEncoding.EncodeToString(rawSignature))
 
-	keyInfo := ctx.createNamespacedElement(sig, KeyInfoTag)
-	x509Data := ctx.createNamespacedElement(keyInfo, X509DataTag)
+	if !ctx.SkipKeyInfo {
+		keyInfo := ctx.createNamespacedElement(sig, KeyInfoTag)
+		x509Data := ctx.createNamespacedElement(keyInfo, X509DataTag)
 
-	certs := [][]byte{cert}
-	if cs, ok := ctx.KeyStore.(X509ChainStore); ok {
-		certs, err = cs.GetChain()
-		if err != nil {
-			return nil, err
+		certs := [][]byte{cert}
+		if cs, ok := ctx.KeyStore.(X509ChainStore); ok {
+			certs, err = cs.GetChain()
+			if err != nil {
+				return nil, err
+			}
 		}
-	}
-	for _, cert := range certs {
-		x509Certificate := ctx.createNamespacedElement(x509Data, X509CertificateTag)
-		x509Certificate.SetText(base64.StdEncoding.EncodeToString(cert))
+
+		for _, cert := range certs {
+			x509Certificate := ctx.createNamespacedElement(x509Data, X509CertificateTag)
+			x509Certificate.SetText(base64.StdEncoding.EncodeToString(cert))
+		}
 	}
 
 	return sig, nil
