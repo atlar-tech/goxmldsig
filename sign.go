@@ -15,22 +15,24 @@ import (
 )
 
 type SigningContext struct {
-	Hash          crypto.Hash
-	KeyStore      X509KeyStore
-	IdAttribute   string
-	Prefix        string
-	SkipKeyInfo   bool
-	Canonicalizer Canonicalizer
+	Hash           crypto.Hash
+	KeyStore       X509KeyStore
+	IdAttribute    string
+	ReferenceXPath string
+	Prefix         string
+	SkipKeyInfo    bool
+	Canonicalizer  Canonicalizer
 }
 
 func NewDefaultSigningContext(ks X509KeyStore) *SigningContext {
 	return &SigningContext{
-		Hash:          crypto.SHA256,
-		KeyStore:      ks,
-		IdAttribute:   DefaultIdAttr,
-		Prefix:        DefaultPrefix,
-		SkipKeyInfo:   false,
-		Canonicalizer: MakeC14N11Canonicalizer(),
+		Hash:           crypto.SHA256,
+		KeyStore:       ks,
+		IdAttribute:    DefaultIdAttr,
+		ReferenceXPath: "",
+		Prefix:         DefaultPrefix,
+		SkipKeyInfo:    false,
+		Canonicalizer:  MakeC14N11Canonicalizer(),
 	}
 }
 
@@ -45,14 +47,38 @@ func (ctx *SigningContext) SetSignatureMethod(algorithmID string) error {
 	return nil
 }
 
-func (ctx *SigningContext) digest(el *etree.Element) ([]byte, error) {
-	canonical, err := ctx.Canonicalizer.Canonicalize(el)
+func (ctx *SigningContext) digestAll(el *etree.Element, xpath string) ([]byte, error) {
+	var elems []*etree.Element
+	if xpath != "" {
+		elems = el.FindElements(ctx.ReferenceXPath)
+	} else {
+		elems = []*etree.Element{el}
+	}
+
+	var dataToCanonicalize []byte
+	for _, e := range elems {
+		canonical, err := ctx.Canonicalizer.Canonicalize(e)
+		if err != nil {
+			return nil, err
+		}
+		dataToCanonicalize = append(dataToCanonicalize, canonical...)
+	}
+
+	return ctx.digest(dataToCanonicalize)
+}
+
+func (ctx *SigningContext) digestElement(el *etree.Element) ([]byte, error) {
+	data, err := ctx.Canonicalizer.Canonicalize(el)
 	if err != nil {
 		return nil, err
 	}
 
+	return ctx.digest(data)
+}
+
+func (ctx *SigningContext) digest(data []byte) ([]byte, error) {
 	hash := ctx.Hash.New()
-	_, err = hash.Write(canonical)
+	_, err := hash.Write(data)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +97,7 @@ func (ctx *SigningContext) constructSignedInfo(el *etree.Element, enveloped bool
 		return nil, errors.New("unsupported signature method")
 	}
 
-	digest, err := ctx.digest(el)
+	digest, err := ctx.digestAll(el, ctx.ReferenceXPath)
 	if err != nil {
 		return nil, err
 	}
@@ -92,11 +118,15 @@ func (ctx *SigningContext) constructSignedInfo(el *etree.Element, enveloped bool
 	// /SignedInfo/Reference
 	reference := ctx.createNamespacedElement(signedInfo, ReferenceTag)
 
-	dataId := el.SelectAttrValue(ctx.IdAttribute, "")
-	if dataId == "" {
-		reference.CreateAttr(URIAttr, "")
+	if ctx.ReferenceXPath != "" {
+		reference.CreateAttr(URIAttr, "#xpointer("+ctx.ReferenceXPath+")")
 	} else {
-		reference.CreateAttr(URIAttr, "#"+dataId)
+		dataId := el.SelectAttrValue(ctx.IdAttribute, "")
+		if dataId == "" {
+			reference.CreateAttr(URIAttr, "")
+		} else {
+			reference.CreateAttr(URIAttr, "#"+dataId)
+		}
 	}
 
 	// /SignedInfo/Reference/Transforms
@@ -168,7 +198,7 @@ func (ctx *SigningContext) ConstructSignature(el *etree.Element, enveloped bool)
 		return nil, err
 	}
 
-	digest, err := ctx.digest(detatchedSignedInfo)
+	digest, err := ctx.digestElement(detatchedSignedInfo)
 	if err != nil {
 		return nil, err
 	}
