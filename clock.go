@@ -24,14 +24,6 @@ func (c *Clock) getWrapped() clockwork.Clock {
 	return c.wrapped
 }
 
-func (c *Clock) After(d time.Duration) <-chan time.Time {
-	return c.getWrapped().After(d)
-}
-
-func (c *Clock) Sleep(d time.Duration) {
-	c.getWrapped().Sleep(d)
-}
-
 func (c *Clock) Now() time.Time {
 	return c.getWrapped().Now()
 }
