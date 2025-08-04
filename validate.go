@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"time"
 
 	"github.com/avantir-tech/goxmldsig/etreeutils"
 	"github.com/avantir-tech/goxmldsig/types"
@@ -27,7 +28,15 @@ var (
 type ValidationContext struct {
 	CertificateStore X509CertificateStore
 	IdAttribute      string
-	Clock            *Clock
+	Clock            Clock
+}
+
+func (vc ValidationContext) now() time.Time {
+	if vc.Clock != nil {
+		return vc.Clock.Now()
+	}
+
+	return time.Now()
 }
 
 func NewDefaultValidationContext(certificateStore X509CertificateStore) *ValidationContext {
@@ -433,7 +442,7 @@ func (ctx *ValidationContext) findSignature(root *etree.Element) (*types.Signatu
 }
 
 func (ctx *ValidationContext) verifyCertificate(sig *types.Signature) (*x509.Certificate, error) {
-	now := ctx.Clock.Now()
+	now := ctx.now()
 
 	roots, err := ctx.CertificateStore.Certificates()
 	if err != nil {
