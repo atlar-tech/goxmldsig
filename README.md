@@ -1,5 +1,21 @@
 # goxmldsig
 
+## About this fork
+
+This is Atlar's fork of [russellhaering/goxmldsig](https://github.com/russellhaering/goxmldsig),
+based on upstream `v1.2.0`. It remains licensed under the original Apache License 2.0
+(see [LICENSE](LICENSE)).
+
+Atlar releases use an `-atlar.N` version suffix (e.g. `v1.5.1-atlar.1`) so they cannot be
+confused with upstream releases.
+
+Changes from upstream `v1.2.0`:
+
+- 2022: option to skip the `KeyInfo` element when signing (`SigningContext.SkipKeyInfo`).
+- 2022: option to set an XPath reference to be digested (`SigningContext.ReferenceXPath`).
+- 2022: module path changed to `github.com/avantir-tech/goxmldsig`.
+- 2025: `Clock` is now an interface, removing the `github.com/jonboulle/clockwork` dependency.
+
 ![Build Status](https://github.com/avantir-tech/goxmldsig/actions/workflows/test.yml/badge.svg?branch=main)
 [![GoDoc](https://godoc.org/github.com/avantir-tech/goxmldsig?status.svg)](https://godoc.org/github.com/avantir-tech/goxmldsig)
 
