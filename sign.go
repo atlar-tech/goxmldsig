@@ -1,4 +1,4 @@
-// Modified by Atlar in 2022: added SkipKeyInfo and ReferenceXPath signing options; changed module import path.
+// Modified by Atlar in 2022, 2026: added SkipKeyInfo and ReferenceXPath signing options (2022); changed module import path (2022, 2026).
 // Original: github.com/russellhaering/goxmldsig v1.2.0 (Apache-2.0).
 
 package dsig
@@ -13,7 +13,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/avantir-tech/goxmldsig/etreeutils"
+	"github.com/atlar-tech/goxmldsig/etreeutils"
 	"github.com/beevik/etree"
 )
 

@@ -1,4 +1,4 @@
-// Modified by Atlar in 2022, 2025: changed module import path (2022); Clock is now an interface, defaulting to time.Now when nil (2025).
+// Modified by Atlar in 2022, 2025, 2026: changed module import path (2022, 2026); Clock is now an interface, defaulting to time.Now when nil (2025).
 // Original: github.com/russellhaering/goxmldsig v1.2.0 (Apache-2.0).
 
 package dsig
@@ -13,8 +13,8 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/avantir-tech/goxmldsig/etreeutils"
-	"github.com/avantir-tech/goxmldsig/types"
+	"github.com/atlar-tech/goxmldsig/etreeutils"
+	"github.com/atlar-tech/goxmldsig/types"
 	"github.com/beevik/etree"
 )
 

@@ -15,9 +15,10 @@ Changes from upstream `v1.2.0`:
 - 2022: option to set an XPath reference to be digested (`SigningContext.ReferenceXPath`).
 - 2022: module path changed to `github.com/avantir-tech/goxmldsig`.
 - 2025: `Clock` is now an interface, removing the `github.com/jonboulle/clockwork` dependency.
+- 2026: module path changed to `github.com/atlar-tech/goxmldsig`.
 
-![Build Status](https://github.com/avantir-tech/goxmldsig/actions/workflows/test.yml/badge.svg?branch=main)
-[![GoDoc](https://godoc.org/github.com/avantir-tech/goxmldsig?status.svg)](https://godoc.org/github.com/avantir-tech/goxmldsig)
+![Build Status](https://github.com/atlar-tech/goxmldsig/actions/workflows/test.yml/badge.svg?branch=main)
+[![GoDoc](https://godoc.org/github.com/atlar-tech/goxmldsig?status.svg)](https://godoc.org/github.com/atlar-tech/goxmldsig)
 
 XML Digital Signatures implemented in pure Go.
 
@@ -26,7 +27,7 @@ XML Digital Signatures implemented in pure Go.
 Install `goxmldsig` using `go get`:
 
 ```
-$ go get github.com/avantir-tech/goxmldsig
+$ go get github.com/atlar-tech/goxmldsig
 ```
 
 ## Usage
@@ -38,7 +39,7 @@ package main
 
 import (
     "github.com/beevik/etree"
-    "github.com/avantir-tech/goxmldsig"
+    "github.com/atlar-tech/goxmldsig"
 )
 
 func main() {
