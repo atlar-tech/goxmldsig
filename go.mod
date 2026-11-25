@@ -1,4 +1,4 @@
-module github.com/avantir-tech/goxmldsig
+module github.com/atlar-tech/goxmldsig
 
 go 1.15
 
