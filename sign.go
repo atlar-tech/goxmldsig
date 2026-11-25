@@ -1,3 +1,6 @@
+// Modified by Atlar in 2022: added SkipKeyInfo and ReferenceXPath signing options; changed module import path.
+// Original: github.com/russellhaering/goxmldsig v1.2.0 (Apache-2.0).
+
 package dsig
 
 import (
